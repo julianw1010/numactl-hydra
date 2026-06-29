@@ -224,12 +224,9 @@ long WEAK get_pgreplpolicy(int *policy, unsigned long *nmask,
           maxnode, addr, flags);
 }
 
-long WEAK set_pgreplpolicy(int mode, const unsigned long *nmask,
-                                   unsigned long maxnode)
+long WEAK set_pgreplpolicy(void)
 {
-  long i;
-  i = syscall(__NR_set_pgtblreplpolicy,mode,nmask,maxnode);
-  return i;
+  return syscall(__NR_set_pgtblreplpolicy);
 }
 
 

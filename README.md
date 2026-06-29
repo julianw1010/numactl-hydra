@@ -12,31 +12,24 @@ Build dependencies (autoconf, automake, libtool, etc.) are installed automatical
 
 ## Page Table Replication
 
-The `--pgtablerepl` (`-r`) option enables page table replication for a launched process. The argument specifies which NUMA nodes should hold replicas.
+The `--pgtablerepl` (`-r`) option enables page table replication for a launched process. It takes no argument: replicas are created on every NUMA node.
 
 ```bash
-# Replicate across all online NUMA nodes
-numactl --pgtablerepl=all ./my_application
-
-# Replicate across nodes 0 and 1
-numactl --pgtablerepl=0,1 ./my_application
-
-# Replicate across a range of nodes
-numactl --pgtablerepl=0-3 ./my_application
+# Replicate page tables across all NUMA nodes
+numactl --pgtablerepl ./my_application
+numactl -r ./my_application
 ```
-
-The node specification uses the same syntax as other numactl options: comma-separated node numbers, ranges with dashes, or `all`. Nodes can be inverted with `!` and made cpuset-relative with `+`.
 
 Replication is applied after all other policy options have been processed and before the command is executed via `execvp`. This means it can be combined with existing numactl options:
 
 ```bash
-numactl --interleave=all --pgtablerepl=all ./my_application
-numactl --membind=0,1 --cpunodebind=0,1 --pgtablerepl=0,1 ./my_application
+numactl --interleave=all --pgtablerepl ./my_application
+numactl --membind=0,1 --cpunodebind=0,1 --pgtablerepl ./my_application
 ```
 
 ## How It Works
 
-The `--pgtablerepl` option calls `numa_set_pgtable_replication_mask()` from libnuma, which issues a `set_pgtblreplpolicy` system call (syscall 400). The kernel then allocates replica page tables on each specified node, migrates the existing page table tree to the primary node, and switches each CPU to its node-local replica via CR3 writes.
+The `--pgtablerepl` option calls `numa_set_pgtable_replication()` from libnuma, which issues a `set_pgtblreplpolicy` system call (syscall 400) with no arguments. The kernel then allocates replica page tables on every node, migrates the existing page table tree to the primary node, and switches each CPU to its node-local replica via CR3 writes.
 
 The option is applied only after confirming a valid command is present on the command line. If the command is missing, numactl prints usage information and exits without modifying any state.
 
@@ -45,9 +38,8 @@ The option is applied only after confirming a valid command is present on the co
 This fork adds the following functions to libnuma:
 
 ```c
-/* Enable page table replication on the specified nodes.
-   Pass numa_no_nodes_ptr to disable. */
-void numa_set_pgtable_replication_mask(struct bitmask *nodemask);
+/* Enable page table replication on all NUMA nodes. */
+void numa_set_pgtable_replication(void);
 
 /* Query the current replication mask. Returns a bitmask that the
    caller must free with numa_bitmask_free(). */

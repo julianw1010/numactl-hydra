@@ -27,8 +27,7 @@ extern "C" {
 /* System calls */
 extern long get_pgreplpolicy(int *mode, unsigned long *nmask,
 			unsigned long maxnode, void *addr, unsigned flags);
-extern long set_pgreplpolicy(int mode, const unsigned long *nmask,
-			  unsigned long maxnode);	
+extern long set_pgreplpolicy(void);
 extern long get_mempolicy(int *mode, unsigned long *nmask,
 			unsigned long maxnode, void *addr, unsigned flags);
 extern long mbind(void *start, unsigned long len, int mode,

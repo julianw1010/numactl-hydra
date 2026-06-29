@@ -177,8 +177,8 @@ void numa_set_interleave_mask(struct bitmask *nodemask);
 /* Return the current interleaving mask */
 struct bitmask *numa_get_interleave_mask(void);
 
-/* Set the page table NUMA node mask. NULL to turn off replication */
-void numa_set_pgtable_replication_mask(struct bitmask *nodemask);
+/* Enable page table replication on all NUMA nodes */
+void numa_set_pgtable_replication(void);
 
 /* Return the current page table replication mask */
 struct bitmask *numa_get_pgtable_replication_mask(void);

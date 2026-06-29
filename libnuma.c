@@ -304,12 +304,6 @@ static void getpol(int *oldpolicy, struct bitmask *bmp)
 		numa_error("get_mempolicy");
 }
 
-static void setpgreplpol(int policy, struct bitmask *bmp)
-{
-	if (set_pgreplpolicy(policy, bmp->maskp, bmp->size + 1) < 0)
-		numa_error("set_pgreplpol");
-}
-
 static void getpgreplpol(int *oldpolicy, struct bitmask *bmp)
 {
 	if (get_pgreplpolicy(oldpolicy, bmp->maskp, bmp->size + 1, 0, 0) < 0)
@@ -1013,12 +1007,10 @@ numa_get_interleave_mask_v2(void)
 __asm__(".symver numa_get_interleave_mask_v2,numa_get_interleave_mask@@libnuma_1.2");
 
 void
-numa_set_pgtable_replication_mask(struct bitmask *bmp)
+numa_set_pgtable_replication(void)
 {
-	if (numa_bitmask_equal(bmp, numa_no_nodes_ptr))
-		setpgreplpol(MPOL_DEFAULT, bmp);
-	else
-		setpgreplpol(MPOL_INTERLEAVE, bmp);
+	if (set_pgreplpolicy() < 0)
+		numa_error("set_pgreplpolicy");
 }
 
 struct bitmask *

@@ -49,7 +49,7 @@ struct option opts[] = {
 	{"show", 0, 0, 's' },
 	{"localalloc", 0,0, 'l'},
 	{"hardware", 0,0,'H' },
-	{"pgtablerepl", 1, 0, 'r' },
+	{"pgtablerepl", 0, 0, 'r' },
 
 	{"shm", 1, 0, 'S'},
 	{"file", 1, 0, 'f'},
@@ -72,7 +72,7 @@ void usage(void)
 		"usage: numactl [--all | -a] [--interleave= | -i <nodes>] [--preferred= | -p <node>]\n"
 		"               [--preferred-order= | -O <nodes>]\n"
 		"               [--physcpubind= | -C <cpus>] [--cpunodebind= | -N <nodes>]\n"
-		"               [--pgtablerepl= | -r <nodes>] \n"
+		"               [--pgtablerepl | -r] \n"
 		"               [--membind= | -m <nodes>] [--localalloc | -l] command args ...\n"
 		"       numactl [--show | -s]\n"
 		"       numactl [--hardware | -H]\n"
@@ -461,20 +461,10 @@ int main(int ac, char **av)
 			break;
 		case 'r': /* --pgtablerepl */
 			checknuma();
-			if (parse_all)
-				mask = numactl_parse_nodestring(optarg, ALL);
-			else
-				mask = numactl_parse_nodestring(optarg, CPUSET);
-			if (!mask) {
-				printf ("<%s> is invalid\n", optarg);
-				usage();
-			}
-
 			errno = 0;
-			did_node_cpu_parse = 1;
-			numa_set_pgtable_replication_mask(mask);
-			checkerror("Error while setting pgtable replication mask");
-			break;						
+			numa_set_pgtable_replication();
+			checkerror("Error while enabling pgtable replication");
+			break;
 		case 'N': /* --cpunodebind */
 		case 'c': /* --cpubind */
 			dontshm("-c/--cpubind/--cpunodebind");
